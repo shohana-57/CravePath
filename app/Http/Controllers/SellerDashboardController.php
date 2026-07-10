@@ -7,7 +7,7 @@ use App\Models\MenuItem;
 use App\Models\Photo;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Http\Request;
+
 
 class SellerDashboardController extends Controller
 {
