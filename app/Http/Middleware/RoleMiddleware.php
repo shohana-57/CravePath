@@ -14,7 +14,7 @@ class RoleMiddleware
      *
      * @param  Closure(Request): (Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string $role = 'food_lover'): Response
     {
         
         if (Auth::check() && Auth::user()->role === $role) {
@@ -24,3 +24,4 @@ class RoleMiddleware
         return redirect()->route('dashboard')->with('error', 'You do not have permission to access this page.');
     }
 }
+

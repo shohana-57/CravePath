@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+             $table->enum('role', ['food_lover', 'seller', 'admin'])->default('food_lover')->after('email');
+            $table->boolean('is_verified_seller')->default(false)->after('role');
         });
     }
 
@@ -22,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            $table->dropColumn(['role', 'is_verified_seller']);
         });
     }
 };
