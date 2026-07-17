@@ -12,6 +12,8 @@ use App\Http\Controllers\ProfileController;
 Route::get('/', [FoodSpotController::class, 'index'])->name('home');
 Route::get('/spots', [FoodSpotController::class, 'index'])->name('spots.index');
 Route::get('/spots/{foodSpot}', [FoodSpotController::class, 'show'])->name('spots.show');
+// AJAX search
+Route::get('/spots-search', [FoodSpotController::class, 'ajaxSearch'])->name('spots.ajax');
 
 Route::middleware('auth')->group(function () {
 

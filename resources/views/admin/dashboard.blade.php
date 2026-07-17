@@ -3,90 +3,135 @@
 @section('title', 'Admin Dashboard')
 
 @section('content')
-<h4 class="mb-4">Admin Dashboard</h4>
+
+<div class="page-header">
+    <div class="container">
+        <h2 class="mb-1"><i class="bi bi-shield-check"></i> Admin Dashboard</h2>
+        <p class="mb-0 opacity-75">Manage food spots, reviews and categories</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card spot-card text-center p-3">
+            <div class="display-6 text-warning">{{ $pendingSpots->count() }}</div>
+            <div class="text-muted small">Pending Spots</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card spot-card text-center p-3">
+            <div class="display-6 text-danger">{{ $flaggedReviews->count() }}</div>
+            <div class="text-muted small">Flagged Reviews</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card spot-card text-center p-3">
+            <div class="display-6 text-success">{{ $categories->count() }}</div>
+            <div class="text-muted small">Categories</div>
+        </div>
+    </div>
+</div>
 
 <div class="row g-4">
 
-    {{-- Category --}}
+    {{-- Categories --}}
     <div class="col-md-4">
-        <div class="card p-3">
-            <h5>Add Category</h5>
-            <form method="POST" action="{{ route('admin.categories.store') }}">
+        <div class="card spot-card p-4">
+            <h5 class="fw-700 mb-3"><i class="bi bi-tags text-warning"></i> Categories</h5>
+            <form method="POST" action="{{ route('admin.categories.store') }}" class="mb-3">
                 @csrf
-                <div class="mb-2">
-                    <input type="text" name="name" class="form-control" placeholder="Category name" required>
+                <div class="input-group">
+                    <input type="text" name="name" class="form-control" placeholder="New category..." required>
+                    <button type="submit" class="btn btn-primary-cp">Add</button>
                 </div>
-                <button type="submit" class="btn btn-warning w-100">Add</button>
             </form>
-
-            <ul class="list-group mt-3">
-                @foreach($categories as $category)
-                    <li class="list-group-item">{{ $category->name }}</li>
-                @endforeach
+            <ul class="list-group list-group-flush">
+                @forelse($categories as $category)
+                    <li class="list-group-item px-0 border-0 py-2">
+                        <i class="bi bi-tag text-warning me-2"></i>{{ $category->name }}
+                    </li>
+                @empty
+                    <li class="list-group-item px-0 text-muted">No categories yet.</li>
+                @endforelse
             </ul>
         </div>
     </div>
 
-    {{-- Pending Spots --}}
     <div class="col-md-8">
-        <div class="card p-3 mb-4">
-            <h5>Pending Food Spots ({{ $pendingSpots->count() }})</h5>
+
+        {{-- Pending Spots --}}
+        <div class="card spot-card p-4 mb-4">
+            <h5 class="fw-700 mb-3"><i class="bi bi-hourglass-split text-warning"></i> Pending Food Spots</h5>
             @if($pendingSpots->isEmpty())
-                <p class="text-muted">No pending spots.</p>
+                <div class="text-center text-muted py-3">
+                    <i class="bi bi-check-circle fs-2 d-block mb-2 text-success"></i>
+                    All spots are approved!
+                </div>
             @else
-                <table class="table table-bordered align-middle">
-                    <thead class="table-warning">
-                        <tr>
-                            <th>Name</th>
-                            <th>Seller</th>
-                            <th>Area</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($pendingSpots as $spot)
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
                             <tr>
-                                <td>{{ $spot->name }}</td>
-                                <td>{{ $spot->seller->name }}</td>
-                                <td>{{ $spot->area }}</td>
-                                <td>
-                                    <form method="POST" action="{{ route('admin.spots.approve', $spot->id) }}" class="d-inline">
-                                        @csrf
-                                        <button class="btn btn-sm btn-success">Approve</button>
-                                    </form>
-                                    <form method="POST" action="{{ route('admin.spots.delete', $spot->id) }}" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-sm btn-danger" onclick="return confirm('Delete?')">Delete</button>
-                                    </form>
-                                </td>
+                                <th>Name</th>
+                                <th>Seller</th>
+                                <th>Area</th>
+                                <th>Actions</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach($pendingSpots as $spot)
+                                <tr>
+                                    <td class="fw-600">{{ $spot->name }}</td>
+                                    <td>{{ $spot->seller->name }}</td>
+                                    <td><i class="bi bi-geo-alt text-danger"></i> {{ $spot->area }}</td>
+                                    <td>
+                                        <form method="POST" action="{{ route('admin.spots.approve', $spot->id) }}" class="d-inline">
+                                            @csrf
+                                            <button class="btn btn-sm btn-success rounded-pill">
+                                                <i class="bi bi-check"></i> Approve
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ route('admin.spots.delete', $spot->id) }}" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-sm btn-danger rounded-pill" onclick="return confirm('Delete?')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             @endif
         </div>
 
-       
-        <div class="card p-3">
-            <h5>Flagged Reviews ({{ $flaggedReviews->count() }})</h5>
+        {{-- Flagged Reviews --}}
+        <div class="card spot-card p-4">
+            <h5 class="fw-700 mb-3"><i class="bi bi-flag text-danger"></i> Flagged Reviews</h5>
             @if($flaggedReviews->isEmpty())
-                <p class="text-muted">No flagged reviews.</p>
+                <div class="text-center text-muted py-3">
+                    <i class="bi bi-shield-check fs-2 d-block mb-2 text-success"></i>
+                    No flagged reviews!
+                </div>
             @else
                 @foreach($flaggedReviews as $review)
-                    <div class="card mb-2 p-2">
+                    <div class="card border-0 bg-light rounded-3 mb-3 p-3">
                         <p class="mb-1">{{ $review->remarks }}</p>
-                        <small class="text-muted">By: {{ $review->user->name }}</small>
-                        <form method="POST" action="{{ route('admin.reviews.delete', $review->id) }}" class="mt-2">
+                        <small class="text-muted mb-2 d-block">By: {{ $review->user->name }}</small>
+                        <form method="POST" action="{{ route('admin.reviews.delete', $review->id) }}">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-sm btn-danger">Remove Review</button>
+                            <button class="btn btn-sm btn-danger rounded-pill">
+                                <i class="bi bi-trash"></i> Remove Review
+                            </button>
                         </form>
                     </div>
                 @endforeach
             @endif
         </div>
     </div>
-
 </div>
+
 @endsection

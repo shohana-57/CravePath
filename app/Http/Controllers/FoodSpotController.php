@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FoodSpot;
 use App\Models\Category;
+use App\Services\WeatherService;
 use Illuminate\Http\Request;
 
 
@@ -19,6 +20,10 @@ class FoodSpotController extends Controller
 
         if ($request->filled('area')) {
             $query->where('area', 'like', '%'.$request->area.'%');
+
+            // saving last search
+
+             cookie()->queue(cookie('last_searched_area', $request->area, 60 * 24 * 7));
         }
 
         if ($request->filled('category_id')) {
@@ -31,14 +36,65 @@ class FoodSpotController extends Controller
         $spots = $query->latest()->get();
         $categories = Category::all();
 
-        return view('spots.index', compact('spots', 'categories'));
+        //reading last searching area from cookies
+        $lastSearchedArea = $request->cookie('last_searched_area');
+
+        return view('spots.index', compact('spots', 'categories', 'lastSearchedArea'));
     }
-     public function show(FoodSpot $spot)
+     public function show(Request $request, FoodSpot $foodSpot)
     {
-        $spot->load('menuItems', 'photos', 'reviews.user', 'category', 'seller');
+        $foodSpot->load('menuItems', 'photos', 'reviews.user', 'category', 'seller');
+
+        //get weather for the food spot's area using Guzzle
+        $weather = null;
+        if ($foodSpot->area) {
+            $weatherService = new WeatherService();
+            $weather = $weatherService->getWeatherByCity($foodSpot->area);
+        }
+
 
         return view('spots.show', compact('foodSpot'));
     }
 
     
+    //  returning JSON for search without page reload
+    public function ajaxSearch(Request $request)
+    {
+        $query = FoodSpot::where('is_approved', true);
+
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('area')) {
+            $query->where('area', 'like', '%' . $request->area . '%');
+        }
+
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->filled('price_range')) {
+            $query->where('price_range', $request->price_range);
+        }
+
+        $spots = $query->latest()->get()->map(function ($spot) {
+            return [
+                'id'           => $spot->id,
+                'name'         => $spot->name,
+                'area'         => $spot->area,
+                'price_range'  => ucfirst($spot->price_range),
+                'avg_rating'   => number_format($spot->avg_rating, 1),
+                'review_count' => $spot->review_count,
+                'category'     => $spot->category ? $spot->category->name : null,
+                'url'          => route('spots.show', $spot->id),
+                'photo'        => $spot->photos->first()
+                    ? asset('storage/' . $spot->photos->first()->path)
+                    : null,
+            ];
+        });
+
+        return response()->json($spots);
+    }
+ 
 }
