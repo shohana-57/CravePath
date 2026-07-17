@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/spots/{foodSpot}', [SellerDashboardController::class, 'destroy'])->name('spots.destroy');
         Route::post('/spots/{foodSpot}/menu-items', [SellerDashboardController::class, 'addMenuItem'])->name('menu.store');
         Route::post('/spots/{foodSpot}/photos', [SellerDashboardController::class, 'addPhoto'])->name('photos.store');
+        Route::delete('/menu-items/{menuItem}', [SellerDashboardController::class, 'deleteMenuItem'])->name('menu.destroy');
     });
 
     // Admin routes

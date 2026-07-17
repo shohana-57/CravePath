@@ -52,6 +52,55 @@ class SellerDashboardController extends Controller
 
         return redirect()->route('seller.dashboard')->with('success', 'Food spot deleted!');
     }
+
+     public function store(Request $request)
+    {
+        $request->validate([
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'area'        => 'required|string|max:255',
+            'address'     => 'nullable|string|max:255',
+            'price_range' => 'required|in:budget,mid,premium',
+            'category_id' => 'nullable|exists:categories,id',
+            'photos.*'    => 'nullable|image|max:2048',
+        ]);
+
+        $spot = FoodSpot::create([
+            'user_id'     => auth()->id(),
+            'category_id' => $request->category_id,
+            'name'        => $request->name,
+            'description' => $request->description,
+            'area'        => $request->area,
+            'address'     => $request->address,
+            'price_range' => $request->price_range,
+            'is_approved' => false,
+        ]);
+
+        // multiple photo upload handling
+         if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $file) {
+                $path = $file->store('spot_photos', 'public');
+                Photo::create([
+                    'food_spot_id' => $spot->id,
+                    'user_id'      => auth()->id(),
+                    'path'         => $path,
+                ]);
+            }
+        }
+
+        return redirect()->route('seller.dashboard')
+            ->with('success', 'Food spot submitted for approval!');
+    }
+
+    public function edit(FoodSpot $foodSpot)
+    {
+        if ($foodSpot->user_id !== auth()->id()) abort(403);
+        $categories = Category::all();
+        $foodSpot->load('menuItems', 'photos');
+        return view('seller.edit', compact('foodSpot', 'categories'));
+    }
+
+
      public function addMenuItem(Request $request, FoodSpot $foodSpot)
     {
         if ($foodSpot->user_id !== auth()->id()) {
@@ -90,6 +139,13 @@ class SellerDashboardController extends Controller
         ]);
 
         return back()->with('success', 'Photo uploaded!');
+    }
+
+    public function deleteMenuItem(MenuItem $menuItem)
+    {
+        if ($menuItem->foodSpot->user_id !== auth()->id()) abort(403);
+        $menuItem->delete();
+        return back()->with('success', 'Menu item removed!');
     }
 
 }
