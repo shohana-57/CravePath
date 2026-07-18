@@ -6,6 +6,8 @@ use App\Models\FoodSpot;
 use App\Models\MenuItem;
 use App\Models\Photo;
 use App\Models\Category;
+use App\Models\Review;
+use App\Models\VisitRequest;
 use Illuminate\Http\Request;
 
 
@@ -33,11 +35,16 @@ class SellerDashboardController extends Controller
             'description' => 'nullable|string',
             'area' => 'required|string|max:255',
             'address' => 'nullable|string|max:255',
+            'contact_number' => 'nullable|string|max:255',
+            'contact_email' => 'nullable|email|max:255',
+            'map_link' => 'nullable|url|max:500',
+            'video_url' => 'nullable|url|max:500',
+            'opening_hours' => 'nullable|string|max:255',
             'price_range' => 'required|in:budget,mid,premium',
             'category_id' => 'nullable|exists:categories,id',
         ]);
         $foodSpot->update($request->only([
-            'name', 'description', 'area', 'address', 'price_range', 'category_id'
+            'name', 'description', 'area', 'address', 'contact_number', 'contact_email', 'map_link', 'video_url', 'opening_hours', 'price_range', 'category_id'
         ]));
 
         return redirect()->route('seller.dashboard')->with('success', 'Food spot updated!');
@@ -60,6 +67,11 @@ class SellerDashboardController extends Controller
             'description' => 'nullable|string',
             'area'        => 'required|string|max:255',
             'address'     => 'nullable|string|max:255',
+            'contact_number' => 'nullable|string|max:255',
+            'contact_email' => 'nullable|email|max:255',
+            'map_link' => 'nullable|url|max:500',
+            'video_url' => 'nullable|url|max:500',
+            'opening_hours' => 'nullable|string|max:255',
             'price_range' => 'required|in:budget,mid,premium',
             'category_id' => 'nullable|exists:categories,id',
             'photos.*'    => 'nullable|image|max:2048',
@@ -72,6 +84,11 @@ class SellerDashboardController extends Controller
             'description' => $request->description,
             'area'        => $request->area,
             'address'     => $request->address,
+            'contact_number' => $request->contact_number,
+            'contact_email' => $request->contact_email,
+            'map_link' => $request->map_link,
+            'video_url' => $request->video_url,
+            'opening_hours' => $request->opening_hours,
             'price_range' => $request->price_range,
             'is_approved' => false,
         ]);
@@ -98,6 +115,23 @@ class SellerDashboardController extends Controller
         $categories = Category::all();
         $foodSpot->load('menuItems', 'photos');
         return view('seller.edit', compact('foodSpot', 'categories'));
+    }
+
+    public function reviews()
+    {
+        $spotIds = FoodSpot::where('user_id', auth()->id())->pluck('id');
+        $reviews = Review::whereIn('food_spot_id', $spotIds)->with('foodSpot', 'user')->latest()->get();
+        return view('seller.reviews', compact('reviews'));
+    }
+
+    public function visitRequests()
+    {
+        $visitRequests = VisitRequest::with('user', 'foodSpot')
+            ->whereHas('foodSpot', function ($q) {
+                $q->where('user_id', auth()->id());
+            })->latest()->get();
+
+        return view('seller.visit_requests', compact('visitRequests'));
     }
 
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FoodSpot;
 use App\Models\Category;
+use App\Models\VisitedSpot;
 use App\Services\WeatherService;
 use Illuminate\Http\Request;
 
@@ -45,15 +46,13 @@ class FoodSpotController extends Controller
     {
         $foodSpot->load('menuItems', 'photos', 'reviews.user', 'category', 'seller');
 
-        //get weather for the food spot's area using Guzzle
         $weather = null;
         if ($foodSpot->area) {
             $weatherService = new WeatherService();
             $weather = $weatherService->getWeatherByCity($foodSpot->area);
         }
 
-
-        return view('spots.show', compact('foodSpot'));
+        return view('spots.show', compact('foodSpot', 'weather'));
     }
 
     
@@ -96,5 +95,46 @@ class FoodSpotController extends Controller
 
         return response()->json($spots);
     }
- 
+
+    public function feed(Request $request)
+    {
+        $spots = FoodSpot::where('is_approved', true)
+            ->latest()
+            ->with('photos', 'category', 'reviews.user', 'seller')
+            ->get();
+
+        $weatherService = new WeatherService();
+        $weatherBySpot = [];
+
+        foreach ($spots as $spot) {
+            if ($spot->area) {
+                $weatherBySpot[$spot->id] = cache()->remember("weather:spot:{$spot->id}", now()->addMinutes(15), function () use ($weatherService, $spot) {
+                    return $weatherService->getWeatherByCity($spot->area);
+                });
+            }
+        }
+
+        $visitedSpots = VisitedSpot::with('user')->latest()->get();
+
+        return view('feed.index', compact('spots', 'visitedSpots', 'weatherBySpot'));
+    }
+
+    public function weather(FoodSpot $foodSpot)
+    {
+        if (! $foodSpot->area) {
+            return response()->json(null, 404);
+        }
+
+        $weatherService = new WeatherService();
+        $weather = $weatherService->getWeatherByCity($foodSpot->area);
+
+        if (! $weather) {
+            return response()->json(null, 404);
+        }
+
+        // update cache
+        cache()->put("weather:spot:{$foodSpot->id}", $weather, now()->addMinutes(15));
+
+        return response()->json($weather);
+    }
 }

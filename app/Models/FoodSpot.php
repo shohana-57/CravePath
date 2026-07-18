@@ -13,6 +13,11 @@ class FoodSpot extends Model
         'description',
         'area',
         'address',
+        'contact_number',
+        'contact_email',
+        'map_link',
+        'video_url',
+        'opening_hours',
         'price_range',
         'avg_rating',
         'review_count',
@@ -44,7 +49,10 @@ class FoodSpot extends Model
         return $this->hasMany(Photo::class);
     }
 
-
+    public function visitRequests()
+    {
+        return $this->hasMany(VisitRequest::class);
+    }
 }
 
 
