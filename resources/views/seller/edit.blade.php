@@ -75,6 +75,33 @@
                     </div>
                 </div>
 
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-600">Contact Number</label>
+                        <input type="text" name="contact_number" class="form-control" value="{{ old('contact_number', $foodSpot->contact_number) }}">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-600">Contact Email</label>
+                        <input type="email" name="contact_email" class="form-control" value="{{ old('contact_email', $foodSpot->contact_email) }}">
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-600">Google Maps Link</label>
+                        <input type="url" name="map_link" class="form-control" value="{{ old('map_link', $foodSpot->map_link) }}">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-600">Opening Hours</label>
+                        <input type="text" name="opening_hours" class="form-control" value="{{ old('opening_hours', $foodSpot->opening_hours) }}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-600">Menu / Promo Video URL</label>
+                    <input type="url" name="video_url" class="form-control" value="{{ old('video_url', $foodSpot->video_url) }}">
+                </div>
+
                 <button type="submit" class="btn btn-primary-cp w-100">
                     <i class="bi bi-check-circle"></i> Update Spot
                 </button>
@@ -154,8 +181,8 @@
                 <div class="row g-2">
                     @foreach($foodSpot->photos as $photo)
                         <div class="col-6 position-relative">
-                            <img src="{{ asset('storage/'.$photo->path) }}"
-                                class="img-fluid rounded"
+                            <img src="{{ asset('storage/'.$photo->path) }}" data-full="{{ asset('storage/'.$photo->path) }}"
+                                class="img-fluid rounded spot-photo-thumb"
                                 style="height:130px; object-fit:cover; width:100%;">
                         </div>
                     @endforeach

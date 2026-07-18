@@ -64,6 +64,9 @@
                                     <a href="{{ route('spots.show', $spot->id) }}" class="btn btn-sm btn-outline-secondary rounded-pill">
                                         <i class="bi bi-eye"></i>
                                     </a>
+                                    <a href="{{ route('spots.show', $spot->id) }}#reviews" class="btn btn-sm btn-outline-info rounded-pill" title="View reviews">
+                                        <i class="bi bi-chat-dots"></i>
+                                    </a>
                                     <a href="{{ route('seller.spots.edit', $spot->id) }}" class="btn btn-sm btn-outline-warning rounded-pill">
                                         <i class="bi bi-pencil"></i>
                                     </a>

@@ -216,11 +216,13 @@
             <ul class="navbar-nav ms-auto align-items-lg-center">
                  <li class="nav-item"><a class="nav-link" href="{{ route('home') }}"><i class="bi bi-house"></i> Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('spots.index') }}"><i class="bi bi-compass"></i> Explore</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('feed') }}"><i class="bi bi-newspaper"></i> Feed</a></li>
 
 
                 @auth
                     @if(auth()->user()->role === 'seller')
                         <li class="nav-item"><a class="nav-link" href="{{ route('seller.dashboard') }}"><i class="bi bi-shop"></i> My Spots</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('seller.reviews.index') }}"><i class="bi bi-chat-dots"></i> Reviews</a></li>
                     @elseif(auth()->user()->role === 'admin')
                         <li class="nav-item"><a class="nav-link" href="{{ route('admin.dashboard') }}"><i class="bi bi-gear"></i> Admin</a></li>
                     @else
@@ -278,6 +280,69 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Global photo modal -->
+<div class="modal fade" id="photoModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-body p-0 text-center">
+                <img src="" alt="photo" id="photoModalImg" class="img-fluid w-100" style="object-fit:contain;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('click', function (e) {
+        const target = e.target;
+        if (target && target.classList && target.classList.contains('spot-photo-thumb')) {
+                const src = target.dataset.full || target.src;
+                const img = document.getElementById('photoModalImg');
+                img.src = src;
+                const modalEl = document.getElementById('photoModal');
+                const bs = new bootstrap.Modal(modalEl);
+                bs.show();
+        }
+});
+// weather refresh handler
+document.addEventListener('click', function (e) {
+    const target = e.target;
+    if (target && target.classList && target.classList.contains('refresh-weather')) {
+        const spotId = target.dataset.spotId;
+        if (! spotId) return;
+        target.disabled = true;
+        target.innerText = 'Refreshing...';
+        fetch(`/spots/${spotId}/weather`)
+            .then(res => {
+                if (!res.ok) throw new Error('No weather');
+                return res.json();
+            })
+            .then(data => {
+                const block = document.querySelector(`.weather-block[data-spot-id="${spotId}"]`);
+                if (!block) return;
+                const tempEl = block.querySelector('.weather-temp');
+                const descEl = block.querySelector('.weather-desc');
+                const iconEl = block.querySelector('.weather-icon');
+                const humEl = block.querySelector('.weather-humidity');
+                const windEl = block.querySelector('.weather-wind');
+
+                if (tempEl) tempEl.innerText = data.temperature + '°C';
+                if (descEl) descEl.innerText = data.description;
+                if (iconEl) iconEl.src = `https://openweathermap.org/img/wn/${data.icon}@2x.png`;
+                if (humEl) humEl.innerText = data.humidity + '%';
+                if (windEl) windEl.innerText = data.wind + ' km/h';
+            })
+            .catch(() => {
+                alert('Unable to fetch weather right now.');
+            })
+            .finally(() => {
+                target.disabled = false;
+                target.innerText = 'Refresh';
+            });
+    }
+});
+</script>
+
 @yield('scripts')
 </body>
 </html>

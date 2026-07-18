@@ -24,41 +24,47 @@
     <div class="row row-cols-1 row-cols-md-3 g-4">
         @foreach($saved as $item)
             <div class="col">
-                <div class="card spot-card h-100">
-                    @if($item->foodSpot->photos->first())
-                        <img src="{{ asset('storage/'.$item->foodSpot->photos->first()->path) }}"
-                            class="card-img-top" style="height:190px; object-fit:cover;">
-                    @else
-                        <div class="d-flex align-items-center justify-content-center bg-light" style="height:190px;">
-                            <i class="bi bi-image text-muted fs-1"></i>
+                @if($item->foodSpot)
+                    <div class="card spot-card h-100">
+                        @if($item->foodSpot->photos->first())
+                            <img src="{{ asset('storage/'.$item->foodSpot->photos->first()->path) }}" data-full="{{ asset('storage/'.$item->foodSpot->photos->first()->path) }}"
+                                class="card-img-top spot-photo-thumb" style="height:190px; object-fit:cover;">
+                        @else
+                            <div class="d-flex align-items-center justify-content-center bg-light" style="height:190px;">
+                                <i class="bi bi-image text-muted fs-1"></i>
+                            </div>
+                        @endif
+                        <div class="card-body">
+                            <h5 class="card-title">{{ $item->foodSpot->name }}</h5>
+                            <p class="text-muted small mb-1">
+                                <i class="bi bi-geo-alt-fill text-danger"></i> {{ $item->foodSpot->area }}
+                            </p>
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-star-fill text-warning"></i>
+                                {{ number_format($item->foodSpot->avg_rating, 1) }}
+                                ({{ $item->foodSpot->review_count }} reviews)
+                            </p>
+                            <span class="badge badge-{{ $item->foodSpot->price_range }}">
+                                {{ ucfirst($item->foodSpot->price_range) }}
+                            </span>
                         </div>
-                    @endif
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $item->foodSpot->name }}</h5>
-                        <p class="text-muted small mb-1">
-                            <i class="bi bi-geo-alt-fill text-danger"></i> {{ $item->foodSpot->area }}
-                        </p>
-                        <p class="text-muted small mb-2">
-                            <i class="bi bi-star-fill text-warning"></i>
-                            {{ number_format($item->foodSpot->avg_rating, 1) }}
-                            ({{ $item->foodSpot->review_count }} reviews)
-                        </p>
-                        <span class="badge badge-{{ $item->foodSpot->price_range }}">
-                            {{ ucfirst($item->foodSpot->price_range) }}
-                        </span>
+                        <div class="card-footer bg-white border-0 pb-3 d-flex gap-2">
+                            <a href="{{ route('spots.show', $item->foodSpot->id) }}"
+                                class="btn btn-outline-cp btn-sm flex-fill">View</a>
+                            <form method="POST" action="{{ route('saved.destroy', $item->foodSpot->id) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-sm btn-outline-danger rounded-pill">
+                                    <i class="bi bi-bookmark-x"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                    <div class="card-footer bg-white border-0 pb-3 d-flex gap-2">
-                        <a href="{{ route('spots.show', $item->foodSpot->id) }}"
-                            class="btn btn-outline-cp btn-sm flex-fill">View</a>
-                        <form method="POST" action="{{ route('saved.destroy', $item->foodSpot->id) }}">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger rounded-pill">
-                                <i class="bi bi-bookmark-x"></i>
-                            </button>
-                        </form>
+                @else
+                    <div class="card spot-card h-100 p-4 text-center text-muted">
+                        This saved spot was removed.
                     </div>
-                </div>
+                @endif
             </div>
         @endforeach
     </div>

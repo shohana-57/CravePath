@@ -64,6 +64,33 @@
                     </div>
                 </div>
 
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Contact Number</label>
+                        <input type="text" name="contact_number" class="form-control" placeholder="e.g. +88017...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Contact Email</label>
+                        <input type="email" name="contact_email" class="form-control" placeholder="shop@example.com">
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Google Maps Link</label>
+                        <input type="url" name="map_link" class="form-control" placeholder="https://maps.google.com/...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Opening Hours</label>
+                        <input type="text" name="opening_hours" class="form-control" placeholder="10 AM – 10 PM">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-600">Menu / Promo Video URL</label>
+                    <input type="url" name="video_url" class="form-control" placeholder="https://youtube.com/watch?v=...">
+                </div>
+
                 <div class="mb-4">
                     <label class="form-label fw-600">Photos (you can select multiple)</label>
                     <input type="file" name="photos[]" class="form-control" accept="image/*" multiple>
